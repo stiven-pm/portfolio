@@ -1,0 +1,17 @@
+/* Chillax Semibold — títulos / subtítulos (Mantine headings, navbar título) */
+@font-face {
+  font-family: 'Chillax';
+  src: url('/fonts/chillax/Chillax-Semibold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Neue Montreal — texto corrido */
+@font-face {
+  font-family: 'Neue Montreal';
+  src: url('/fonts/NeueMontreal-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

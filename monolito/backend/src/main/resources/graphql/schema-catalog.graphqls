@@ -1,0 +1,238 @@
+extend type Query {
+  "Proyectos con variantes y cotizaciones"
+  projects: [Project!]!
+  "Proyectos del vendedor"
+  projectsBySales(salesId: ID!): [Project!]!
+  "Proyectos del cotizador"
+  projectsByQuoter(quoterId: ID!): [Project!]!
+  "Proyectos marcados efectivos"
+  projectsEffective: [Project!]!
+  "Proyectos efectivos para rol desarrollo (datos maestros)"
+  projectsForDevelopment: [Project!]!
+  "Proyectos con variantes asignadas a este cotizador (solo lo asignado)"
+  projectsByAssignedQuoter(quoterId: ID!): [Project!]!
+  "Proyectos efectivos con variantes asignadas a este diseñador (solo lo asignado)"
+  projectsByAssignedDesigner(designerId: ID!): [Project!]!
+  "Proyectos efectivos con variantes asignadas a este usuario de desarrollo (solo lo asignado)"
+  projectsByAssignedDevelopment(userId: ID!): [Project!]!
+  "Proyectos para que líderes asignen. role: cotizador (todos), disenador (cotizados), desarrollo (diseñados)"
+  projectsForAssignment(role: String): [Project!]!
+  "Estándares de tiempo por tipología (para métricas)"
+  typologyStandards: [TypologyStandard!]!
+}
+
+extend type Mutation {
+  "Crear proyecto"
+  createProject(input: CreateProjectInput!): Project
+  "Actualizar proyecto"
+  updateProject(input: UpdateProjectInput!): Project
+  "Reabrir proyecto para edición"
+  reOpenProject(projectId: ID!): Boolean
+  "Actualizar variante (componentes, cantidad, comentarios) y reabrir proyecto"
+  updateVariantAndReopen(input: UpdateVariantAndReopenInput!): Boolean
+  "Marcar proyecto como efectivo"
+  makeProjectEffective(projectId: ID!): Boolean
+  "Quitar efectivo de un proyecto"
+  quitarProjectEffective(projectId: ID!): Boolean
+  "Marcar variante como efectiva en proyecto efectivo. variantQuoteId identifica la línea si hay varias con el mismo variantId."
+  makeVariantQuoteEffective(projectId: ID!, variantId: ID, variantQuoteId: ID, effective: Boolean!): Boolean
+  "Alternar tipología P3/P5 (solo cotizador)"
+  toggleP3P5(projectId: ID!, variantId: ID, variantQuoteId: ID): Boolean
+  "Diseñador marca variante como diseñada (planPdfKey: clave S3 bucket planos tras subir PDF)"
+  markVariantAsDesigned(projectId: ID!, variantId: ID, variantQuoteId: ID, designerId: ID!, planPdfKey: String): Boolean
+  "Desarrollo marca variante como desarrollada"
+  markVariantAsDeveloped(projectId: ID!, variantId: ID, variantQuoteId: ID, developmentUserId: ID!): Boolean
+  "Eliminar proyecto"
+  deleteProject(projectId: ID!): Boolean
+  "Cotizar variante"
+  quoteVariant(input: QuoteVariantInput!): Boolean
+  "Actualizar cantidad de variante en proyecto (sin reabrir)"
+  updateVariantQuoteQuantity(input: UpdateVariantQuoteQuantityInput!): Boolean
+  "Quitar variante de proyecto (sin reabrir)"
+  removeVariantFromProject(projectId: ID!, variantId: ID, variantQuoteId: ID): Boolean
+  "Líder asigna línea del proyecto (variant_quote) a usuario (roleType: QUOTER, DESIGNER, DEVELOPMENT)"
+  assignVariantToUser(projectId: ID!, variantQuoteId: ID!, assigneeId: ID!, roleType: String!): Boolean
+}
+
+type Project {
+  id: ID!
+  consecutive: String!
+  name: String!
+  version: Int!
+  client: String
+  region: String
+  salesId: ID
+  quoterId: ID
+  state: Int!
+  quoted: Boolean!
+  reopen: Boolean!
+  effective: Boolean!
+  totalCost: Int
+  estimatedTime: Int
+  createdAt: String!
+  "Fecha/hora exacta de solicitud (comercial). Para métricas."
+  requestedAt: String
+  variants: [ProjectVariant!]!
+}
+
+type TypologyStandard {
+  id: ID!
+  tipologia: String!
+  daysCotiz: Int!
+  daysDiseno: Int!
+  daysDesarrollo: Int
+  hoursPerWeek: Int
+}
+
+type ProjectVariant {
+  id: ID!
+  sapRef: String
+  sapCode: String
+  type: String
+  effective: Boolean
+  criticalMaterial: String
+  comments: String
+  elaborationTime: Int
+  quantity: Int
+  price: Int
+  "Fecha/hora en que cotizador terminó de cotizar"
+  quotedAt: String
+  "Fecha/hora en que diseñador marcó como diseñada"
+  designedAt: String
+  "Fecha/hora en que desarrollo marcó como desarrollada"
+  developedAt: String
+  "Clave S3 (bucket planos) del PDF de planos"
+  planPdfKey: String
+  "Asignado por líder: cotizador/diseñador/desarrollo responsable"
+  assignedQuoterId: ID
+  assignedDesignerId: ID
+  assignedDevelopmentUserId: ID
+  "Legacy: misma lista que variables."
+  components: [ComponentResponse!]!
+  "Dominio UX: variables (alias de components)."
+  variables: [ComponentResponse!]!
+  baseId: ID
+  baseName: String
+  baseImage: String
+  category: String
+  subcategory: String
+  line: String
+  "ID variante original en Products (para comparación)"
+  productVariantId: ID
+  "PK de la línea en el proyecto (variant_quote); usar para mutaciones por fila"
+  variantQuoteId: ID
+}
+
+"Componente con códigos SAP. sapRef=referencia persistente. sapCode visible solo si value=originalValue."
+type ComponentResponse {
+  id: ID!
+  sapRef: String
+  "SAP variante. Null si value != originalValue (edición en proyecto)."
+  sapCode: String
+  name: String!
+  value: String
+  "Valor original; si value != originalValue, no mostrar sapCode."
+  originalValue: String
+  "Valor original del catálogo (para revertir y tener 2 códigos cuando hay override)."
+  catalogOriginalValue: String
+}
+
+type VariantQuote {
+  id: ID!
+  price: Int
+  elaborationTime: Int
+}
+
+input CreateProjectInput {
+  name: String!
+  client: String
+  region: String
+  salesId: ID
+  salesName: String
+  salesEmail: String
+  salesPhone: String
+  salesSignature: String
+  salesJobTitle: String
+  quoterId: ID
+  quoterName: String
+  quoterEmail: String
+  variants: [CatalogCreateVariantInput!]
+  p3s: [CreateP3Input!]
+}
+
+input CatalogCreateVariantInput {
+  variantId: ID
+  baseId: ID!
+  variantSapRef: String
+  type: String
+  comments: String
+  quantity: Int
+  image: String
+  components: [CatalogCreateComponentInput!]!
+}
+
+"componentId obligatorio"
+input CatalogCreateComponentInput {
+  componentId: ID
+  componentValue: String
+  "Si true: crear nueva instancia. No modificar el original."
+  modified: Boolean
+  "Nombre del componente original (para modified)."
+  componentName: String
+}
+
+input CreateP3Input {
+  comment: String
+  image: String
+  components: [CatalogCreateComponentInput!]!
+}
+
+input UpdateProjectInput {
+  id: ID!
+  consecutive: String
+  name: String
+  version: Int
+  client: String
+  region: String
+  state: Int
+  quoted: Boolean
+  effective: Boolean
+  totalCost: Int
+  estimatedTime: Int
+}
+
+input QuoteVariantInput {
+  projectId: ID!
+  "Obligatorio salvo que vaya variantQuoteId"
+  variantId: ID
+  "PK variant_quote; usar con varias líneas del mismo product_variant_id"
+  variantQuoteId: ID
+  quoterId: ID!
+  price: Int
+  elaborationTime: Int
+  criticalMaterial: String
+}
+
+input UpdateVariantQuoteQuantityInput {
+  projectId: ID!
+  variantId: ID
+  variantQuoteId: ID
+  quantity: Int!
+}
+
+input UpdateVariantAndReopenInput {
+  projectId: ID!
+  variantId: ID
+  variantQuoteId: ID
+  quantity: Int
+  comments: String
+  type: String
+  components: [ComponentIdValueInput!]
+}
+
+input ComponentIdValueInput {
+  componentId: ID
+  componentName: String
+  value: String
+  modified: Boolean
+}

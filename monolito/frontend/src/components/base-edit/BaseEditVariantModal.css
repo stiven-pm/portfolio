@@ -1,0 +1,112 @@
+/* Previews actuales (editar variante) */
+.base-edit-media-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.base-edit-media-card {
+  flex: 1 1 200px;
+  min-width: 160px;
+  max-width: 100%;
+  border-radius: 10px;
+  background: var(--color-bg, #f8f9fa);
+}
+
+.base-edit-media-preview-img {
+  display: block;
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: var(--color-bg-white, #fff);
+}
+
+.base-edit-media-iframe {
+  width: 100%;
+  height: 200px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-bg-input, #eee);
+}
+
+.base-edit-media-model-fallback {
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #e8f4f6 0%, #d0e8ec 100%);
+  color: var(--color-primary);
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+}
+
+/* Fila variables (alineada con Crear variante) */
+.base-edit-variant-var-row {
+  align-items: flex-start;
+}
+
+/* Misma altura de franja de label: evita que "Nombre variable" baje solo un input */
+.base-edit-variant-var-row .mantine-TextInput-label,
+.base-edit-variant-var-row .mantine-InputWrapper-label {
+  min-height: 2.35rem;
+  line-height: 1.25;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 2px;
+}
+
+.base-edit-valor-mantine-wrap {
+  --cv-input-h: var(--input-height-sm, 36px);
+  --cv-input-pad: calc(var(--cv-input-h) / 3);
+}
+
+.base-edit-valor-mantine-wrap .base-edit-valor-autocomplete {
+  width: 100%;
+}
+
+.base-edit-valor-mantine-wrap .base-edit-valor-autocomplete input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  height: var(--cv-input-h);
+  min-height: var(--cv-input-h);
+  line-height: calc(var(--cv-input-h) - calc(0.125rem * var(--mantine-scale, 1)));
+  padding-inline: var(--cv-input-pad);
+  padding-block: 0;
+  margin: 0;
+  font-family: var(--mantine-font-family);
+  font-size: var(--mantine-font-size-sm);
+  color: var(--mantine-color-text);
+  background-color: var(--mantine-color-white);
+  border: calc(0.0625rem * var(--mantine-scale, 1)) solid var(--mantine-color-gray-4);
+  border-radius: var(--mantine-radius-default);
+  box-shadow: none;
+}
+
+[data-mantine-color-scheme='dark'] .base-edit-valor-mantine-wrap .base-edit-valor-autocomplete input {
+  background-color: var(--mantine-color-dark-6);
+  border-color: var(--mantine-color-dark-4);
+  color: var(--mantine-color-dark-0);
+}
+
+.base-edit-valor-mantine-wrap .base-edit-valor-autocomplete input:focus {
+  outline: none;
+  border-color: var(--mantine-primary-color-filled);
+  box-shadow: none;
+}
+
+.base-edit-valor-mantine-wrap .base-edit-valor-autocomplete input::placeholder {
+  color: var(--mantine-color-placeholder);
+}
+
+.base-edit-valor-mantine-wrap .base-edit-valor-autocomplete .autocomplete-list {
+  z-index: 420;
+}
+
+.base-edit-variant-remove-var-icon {
+  flex-shrink: 0;
+}

@@ -1,0 +1,10 @@
+frontend:
+  artifacts:
+    baseDirectory: /
+    files:
+      - "**/*"
+  customHeaders:
+    - pattern: "**/assets/**"
+      headers:
+        - key: Cache-Control
+          value: "no-store"

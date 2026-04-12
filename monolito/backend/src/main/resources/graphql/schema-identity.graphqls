@@ -1,0 +1,118 @@
+extend type Query {
+  "Info del admin autenticado"
+  admin: UserResponse
+  "Usuarios por IDs (para mostrar nombres en chat/hilos)"
+  usersByIds(userIds: [ID!]!): [UserResponse!]!
+  "Health check"
+  health: String
+  "Lista de cotizadores. limit/offset opcionales para paginación."
+  quoters(limit: Int, offset: Int): QuotersPage!
+  "Lista de vendedores. limit/offset opcionales."
+  sales(limit: Int, offset: Int): SalesPage!
+  "Lista de diseñadores. limit/offset opcionales."
+  designers(limit: Int, offset: Int): DesignersPage!
+  "Lista de usuarios desarrollo/datos maestros. limit/offset opcionales."
+  developers(limit: Int, offset: Int): DevelopersPage!
+}
+
+extend type Mutation {
+  "Login"
+  signIn(input: LoginInput!): TokenResponse
+  "Actualizar info del admin"
+  updateAdmin(input: UserUpdateInput!): UserResponse
+  "Crear usuario"
+  createUser(input: RegisterInput!): Boolean
+  "Eliminar usuario"
+  deleteUser(userId: ID!): Boolean
+  "Editar usuario"
+  editUser(userId: ID!, input: UserUpdateInput!): Boolean
+}
+
+type TokenResponse {
+  user: UserResponse!
+  token: String!
+}
+
+type UserResponse {
+  id: ID!
+  name: String!
+  email: String!
+  phone: String
+  role: String!
+  jobTitle: String
+  isLeader: Boolean
+  createdAt: String
+  updatedAt: String
+  createdBy: String
+  updatedBy: String
+}
+
+type QuoterResponse {
+  user: UserResponse!
+  quoted: Int!
+  projects: Int!
+  products: Int!
+}
+
+type SalesResponse {
+  user: UserResponse!
+  requested: Int!
+  effective: Int!
+}
+
+type DesignerResponse {
+  user: UserResponse!
+  created: Int!
+  edited: Int!
+}
+
+type DeveloperResponse {
+  user: UserResponse!
+}
+
+type QuotersPage {
+  items: [QuoterResponse!]!
+  pageInfo: PageInfo!
+}
+
+type SalesPage {
+  items: [SalesResponse!]!
+  pageInfo: PageInfo!
+}
+
+type DesignersPage {
+  items: [DesignerResponse!]!
+  pageInfo: PageInfo!
+}
+
+type DevelopersPage {
+  items: [DeveloperResponse!]!
+  pageInfo: PageInfo!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input RegisterInput {
+  name: String!
+  email: String!
+  phone: String
+  password: String!
+  role: String!
+  jobTitle: String
+  isLeader: Boolean
+  creator: String
+}
+
+input UserUpdateInput {
+  id: ID
+  name: String
+  email: String
+  phone: String
+  password: String
+  role: String
+  jobTitle: String
+  isLeader: Boolean
+}

@@ -1,0 +1,202 @@
+enum VariantScope {
+  LINE
+  SPECIAL
+}
+
+extend type Query {
+  "Todas las bases de producto"
+  bases: [Base!]!
+  "Productos (bases con variantes anidadas). Fuente de verdad para catálogo."
+  products: [Product!]!
+  "Variantes por base"
+  variantsByBase(baseId: ID!): [Variant!]!
+  "Variables por variante (API: Component)"
+  componentsByVariant(variantId: ID!): [Component!]!
+  productCategories: [ProductCategory!]!
+  productSubcategories(categoryId: ID!): [ProductSubcategory!]!
+  productLines(subcategoryId: ID!): [ProductLine!]!
+  variableDefinitions: [VariableDefinition!]!
+}
+
+extend type Mutation {
+  "Crear base"
+  createBase(input: CreateBaseInput!): Base
+  "Actualizar base"
+  updateBase(input: UpdateBaseInput!): Base
+  "Eliminar base"
+  deleteBase(baseId: ID!): Boolean
+  "Crear variante"
+  createVariant(input: ProductCreateVariantInput!): Variant
+  "Actualizar variante"
+  updateVariant(input: UpdateVariantInput!): Variant
+  "Eliminar variante"
+  deleteVariant(variantId: ID!): Boolean
+  "Crear variable (API: component)"
+  createComponent(input: CreateComponentInput!): Component
+  "Actualizar variable"
+  updateComponent(input: UpdateComponentInput!): Component
+  "Eliminar variable"
+  deleteComponent(componentId: ID!): Boolean
+  updateCategory(id: ID!, name: String!): ProductCategory
+  updateSubcategory(id: ID!, name: String!): ProductSubcategory
+  updateProductLine(id: ID!, name: String!): ProductLine
+  updateVariableDefinition(id: ID!, name: String!): VariableDefinition
+  "Crea categoría si no existe (trim + case-insensitive)."
+  ensureProductCategory(name: String!): ProductCategory!
+  "Crea subcategoría bajo la categoría si no existe (trim + case-insensitive)."
+  ensureProductSubcategory(categoryId: ID!, name: String!): ProductSubcategory!
+  "Crea línea bajo la subcategoría si no existe (trim + case-insensitive)."
+  ensureProductLine(subcategoryId: ID!, name: String!): ProductLine!
+}
+
+type ProductCategory {
+  id: ID!
+  name: String!
+}
+
+type ProductSubcategory {
+  id: ID!
+  categoryId: ID!
+  name: String!
+}
+
+type ProductLine {
+  id: ID!
+  subcategoryId: ID!
+  name: String!
+}
+
+type VariableDefinition {
+  id: ID!
+  name: String!
+}
+
+"Base con variantes anidadas. Misma forma que catalog para compatibilidad."
+type Product {
+  id: ID!
+  name: String!
+  categoryId: ID!
+  subcategoryId: ID!
+  lineId: ID!
+  category: String
+  subcategory: String
+  line: String
+  variants: [Variant!]!
+}
+
+type Base {
+  id: ID!
+  name: String!
+  categoryId: ID!
+  subcategoryId: ID!
+  lineId: ID!
+  category: String
+  subcategory: String
+  line: String
+}
+
+type Variant {
+  id: ID!
+  sapRef: String
+  sapCode: String
+  status: String
+  image: String
+  model: String
+  variantScope: VariantScope!
+  "Legacy: misma lista que variables."
+  components: [Component!]!
+  "Dominio UX: variables (alias de components)."
+  variables: [Component!]!
+}
+
+type Component {
+  id: ID!
+  sapRef: String
+  sapCode: String
+  variableDefinitionId: ID!
+  name: String!
+  value: String
+  originalValue: String
+  "Alias de originalValue para compatibilidad con catalog"
+  catalogOriginalValue: String
+  "Si false, la variable no debe editarse en UI"
+  editable: Boolean!
+  "Si true, solo valores existentes en catálogo (lista)"
+  listOnly: Boolean!
+}
+
+input CreateBaseInput {
+  name: String!
+  image: String
+  model: String
+  categoryId: ID!
+  subcategoryId: ID!
+  lineId: ID!
+  creatorId: ID
+  creatorName: String
+  initialVariants: [CreateBaseInitialVariantInput!]
+}
+
+input CreateBaseInitialVariantInput {
+  sapRef: String
+  "Claves S3 u otro identificador de archivo ya subido"
+  image: String!
+  model: String!
+  variantScope: VariantScope
+  components: [CreateBaseInitialComponentInput!]!
+}
+
+input CreateBaseInitialComponentInput {
+  componentId: ID
+  variableDefinitionId: ID
+  componentName: String
+  componentSapRef: String
+  componentSapCode: String
+  componentValue: String
+  componentEditable: Boolean
+  componentListOnly: Boolean
+}
+
+input UpdateBaseInput {
+  id: ID!
+  name: String
+  categoryId: ID
+  subcategoryId: ID
+  lineId: ID
+}
+
+input ProductCreateVariantInput {
+  baseId: ID!
+  sapRef: String
+  image: String!
+  model: String!
+  variantScope: VariantScope
+  components: [CreateBaseInitialComponentInput!]
+}
+
+input UpdateVariantInput {
+  id: ID!
+  sapRef: String
+  image: String
+  model: String
+  variantScope: VariantScope
+  components: [CreateBaseInitialComponentInput!]
+}
+
+input CreateComponentInput {
+  variantId: ID!
+  sapRef: String
+  sapCode: String
+  variableDefinitionId: ID
+  name: String
+  value: String
+}
+
+input UpdateComponentInput {
+  id: ID!
+  sapRef: String
+  sapCode: String
+  variableDefinitionId: ID
+  name: String
+  value: String
+}

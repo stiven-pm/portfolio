@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: app
+  servlet:
+    multipart:
+      max-file-size: 256MB
+      max-request-size: 256MB
+  datasource:
+    url: jdbc:postgresql://appdb:5432/app_db
+    username: app
+    password: app_dev_2024
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+    open-in-view: false
+  data:
+    redis:
+      host: redis
+      port: 6379
+  cache:
+    type: redis
+  graphql:
+    graphiql:
+      enabled: true
+
+app:
+  jwt-secret: "monolito-super-secret-jwt-key-256bits-hardcoded-2024"
+  minio:
+    endpoint: "http://minio:9000"
+    public-endpoint: "http://${HOST_IP:localhost}"
+    access-key: "app_minio"
+    secret-key: "app_minio_2024"
+    bucket-images: images
+    bucket-models: models
+    bucket-plans: plans
+  images:
+    public-base-url: "http://${HOST_IP:localhost}/images"
+    internal-base-url: "http://minio:9000/images"
+  admin:
+    email: "admin@app.local"
+    password-hash: "$2a$10$0sJfvUncbm8aMw3LTku8pOpxjDOlTElP5cu.FEfmUWmScWIsWTHDO"
+    name: "Administrador"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: when-authorized
+
+server:
+  port: 8080
+  tomcat:
+    max-http-form-post-size: 256MB
+    max-swallow-size: 256MB
+
+logging:
+  level:
+    org.hibernate.SQL: WARN
+    root: INFO

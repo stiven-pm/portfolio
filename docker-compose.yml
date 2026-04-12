@@ -1,0 +1,134 @@
+name: app
+
+services:
+
+  appdb:
+    image: postgres:17-alpine
+    container_name: app_db
+    restart: on-failure
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app_dev_2024
+      POSTGRES_DB: app_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - app_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: app_redis
+    restart: on-failure
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - app_net
+
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: app_minio
+    environment:
+      MINIO_ROOT_USER: app_minio
+      MINIO_ROOT_PASSWORD: app_minio_2024
+    volumes:
+      - minio_data:/data
+    command: server --console-address ":9001" /data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - app_net
+
+  minio_init:
+    image: quay.io/minio/mc
+    container_name: app_minio_init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      sh -c "
+      sleep 3 &&
+      mc alias set local http://minio:9000 app_minio app_minio_2024 &&
+      mc mb -p local/images || true &&
+      mc mb -p local/models || true &&
+      mc mb -p local/plans  || true
+      "
+    networks:
+      - app_net
+
+  backend:
+    build:
+      context: ./monolito/backend
+      dockerfile: Dockerfile
+    image: ${DOCKER_REGISTRY:-}app-backend:latest
+    container_name: app_backend
+    restart: on-failure
+    environment:
+      HOST_IP: ${HOST_IP:-localhost}
+    depends_on:
+      appdb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - app_net
+
+  frontend:
+    build:
+      context: ./monolito/frontend
+      dockerfile: Dockerfile
+    image: ${DOCKER_REGISTRY:-}app-frontend:latest
+    container_name: app_frontend
+    restart: on-failure
+    depends_on:
+      - backend
+    networks:
+      - app_net
+
+  caddy:
+    image: caddy:2
+    container_name: app_caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./index.html:/srv/portfolio/index.html:ro
+      - ./styles.css:/srv/portfolio/styles.css:ro
+      - ./app.min.js:/srv/portfolio/app.min.js:ro
+      - ./robots.txt:/srv/portfolio/robots.txt:ro
+      - ./assets:/srv/portfolio/assets:ro
+      - ./preview:/srv/portfolio/preview:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - app_net
+
+volumes:
+  app_db_data:
+  redis_data:
+  minio_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  app_net:
+    driver: bridge

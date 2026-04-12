@@ -1,0 +1,147 @@
+import { createContext, useContext } from 'react';
+import { useUser } from './UserContext';
+import { useCart } from './CartContext';
+import { useCatalogService } from '../hooks/useCatalogService';
+import { useIdentityService } from '../hooks/useIdentityService';
+import { calculateTipologia } from '../utils/calculateTipologia';
+import { uploadFile } from '../api/documentService';
+
+const ProjectContext = createContext(null);
+
+
+// Elige el cotizador con menos proyectos activos
+function pickLeastLoadedQuoter(quoters) {
+  if (!quoters?.length) return null;
+  const sorted = [...quoters].sort((a, b) => (a.projects ?? 0) - (b.projects ?? 0));
+  return sorted[0];
+}
+
+export const useProject = () => {
+  const ctx = useContext(ProjectContext);
+  if (!ctx) throw new Error('useProject must be used within ProjectProvider');
+  return ctx;
+};
+
+export const ProjectProvider = ({ children }) => {
+  const { user } = useUser();
+  const { userProject, customProducts, clearCart } = useCart();
+  const catalog = useCatalogService();
+  const identity = useIdentityService();
+
+  const formatProductForVariant = (product) => {
+    const originals = product._componentOriginals || {};
+    const updated = product.caracteristicas || {};
+    const originalByName = product._originalCaracteristicas || {};
+    const updatedByName = Object.fromEntries(
+      Object.entries(updated).map(([id, v]) => [originals[id]?.name || id, v ?? ''])
+    );
+    const hasMatchingVariant = !!product._selectedVariantId;
+    const tipologiaFromChange = calculateTipologia(originalByName, updatedByName);
+    const tipologia = tipologiaFromChange
+      || (!hasMatchingVariant && Object.keys(updated).length > 0 ? 'p3' : hasMatchingVariant ? 'p4' : undefined);
+
+    const selectedVariant = product._selectedVariantId && product.variants?.length
+      ? product.variants.find((v) => String(v.id) === String(product._selectedVariantId))
+      : product.variants?.[0];
+
+    const comps = updated && Object.keys(updated).length > 0
+      ? Object.entries(updated)
+          .filter(([, v]) => v != null && v !== '')
+          .map(([componentId, value]) => {
+            const orig = originals[componentId];
+            const origVal = String(orig?.value ?? '').trim();
+            const newVal = String(value ?? '').trim();
+            const modified = origVal !== newVal;
+            return {
+              componentId,
+              componentValue: newVal,
+              modified,
+              componentName: orig?.name ?? null,
+            };
+          })
+      : (selectedVariant?.components || []).map((c) => ({
+          componentId: c.id,
+          componentValue: c.value ?? '',
+        }));
+
+    return {
+      variantId: product._selectedVariantId || selectedVariant?.id || undefined,
+      baseId: product._originalId || product.id,
+      variantSapRef: selectedVariant?.sapRef,
+      type: tipologia || undefined,
+      quantity: product.quantity ?? 1,
+      comments: product.comentarios || '',
+      image: product.image || undefined,
+      components: comps.length ? comps : [{ componentId: selectedVariant?.components?.[0]?.id, componentValue: 'default' }],
+    };
+  };
+
+  const formatCustomForP3 = (custom) => {
+    const comps = custom.caracteristicas || custom.specifications || {};
+    const components = Object.entries(comps)
+      .filter(([, v]) => v != null && v !== '')
+      .map(([k, v]) => ({ componentId: null, componentName: k, componentValue: String(v) }));
+
+    return {
+      comment: custom.comentarios || custom.comment || '',
+      image: custom.image || undefined,
+      components: components.length ? components : [{ componentId: null, componentName: 'P3', componentValue: 'custom' }],
+    };
+  };
+
+  const submitProject = async ({ name, cliente, regional, asesor, fechaEntrega }) => {
+    if (!user?.id) throw new Error('Usuario no autenticado');
+    if (!userProject.length && !customProducts.length) throw new Error('El carrito está vacío');
+
+    const variants = userProject.map(formatProductForVariant);
+
+    const p3s = await Promise.all(
+      customProducts.map(async (custom) => {
+        let image = custom.image;
+        if (custom.imageFile) {
+          try {
+            const res = await uploadFile(custom.imageFile, 'image');
+            image = res?.key || null;
+          } catch (e) {
+            throw new Error('Error al subir la imagen del P3: ' + (e?.message || ''));
+          }
+        }
+        return formatCustomForP3({ ...custom, image });
+      })
+    );
+
+    if (variants.length === 0 && p3s.length === 0) {
+      throw new Error('No hay variantes ni productos P3 para crear el proyecto.');
+    }
+
+    const quoters = await identity.getQuoters();
+    const quoter = pickLeastLoadedQuoter(quoters);
+    if (!quoter?.user) {
+      throw new Error('No hay cotizadores disponibles. Por favor contacte al administrador.');
+    }
+
+    const input = {
+      name: name || 'Proyecto',
+      client: cliente,
+      region: regional || '',
+      salesId: user.id,
+      salesName: user.name,
+      salesEmail: user.email,
+      salesPhone: user.phone,
+      quoterId: quoter.user.id,
+      quoterName: quoter.user.name,
+      quoterEmail: quoter.user.email,
+      variants,
+      p3s,
+    };
+
+    await catalog.createProject(input);
+    clearCart();
+  };
+
+  return (
+    <ProjectContext.Provider value={{ submitProject, formatProductForVariant, formatCustomForP3 }}>
+      {children}
+    </ProjectContext.Provider>
+  );
+};

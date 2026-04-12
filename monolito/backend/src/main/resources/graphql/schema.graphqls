@@ -1,0 +1,9 @@
+type Query
+
+type Mutation
+
+type PageInfo {
+  total: Int!
+  limit: Int!
+  offset: Int!
+}

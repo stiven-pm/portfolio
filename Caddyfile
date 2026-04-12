@@ -1,0 +1,59 @@
+{
+	auto_https off
+}
+
+:80 {
+	header {
+		-Server
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+	}
+
+	@sensitive {
+		path /monolito/* /terraform/* /.git/* /.github/* /.env /*.pem /*.sh
+	}
+	respond @sensitive 403
+
+	handle_path /api/* {
+		reverse_proxy backend:8080
+	}
+
+	handle /images/* {
+		reverse_proxy minio:9000 {
+			header_up Range {http.request.header.Range}
+			header_up If-Range {http.request.header.If-Range}
+		}
+	}
+
+	handle /models/* {
+		reverse_proxy minio:9000 {
+			header_up Range {http.request.header.Range}
+			header_up If-Range {http.request.header.If-Range}
+		}
+	}
+
+	handle /plans/* {
+		reverse_proxy minio:9000 {
+			header_up Range {http.request.header.Range}
+			header_up If-Range {http.request.header.If-Range}
+		}
+	}
+
+	handle_path /app/* {
+		reverse_proxy frontend:80
+	}
+
+	handle {
+		root * /srv/portfolio
+		@html_no_cache {
+			path /
+			path /preview/*
+		}
+		header @html_no_cache Cache-Control "no-store, max-age=0, must-revalidate"
+		# Servir index.html en subcarpetas (p. ej. /preview/ecosurprise/); si no existe, SPA al index raíz
+		try_files {path} {path}/index.html /index.html
+		file_server
+	}
+}

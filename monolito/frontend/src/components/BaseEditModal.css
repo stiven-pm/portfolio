@@ -1,0 +1,436 @@
+.base-edit-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.base-edit-modal {
+  background: white;
+  border-radius: 12px;
+  max-width: 720px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 2px 24px var(--color-shadow-xl);
+}
+
+.base-edit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.base-edit-header h2,
+.base-edit-header .mantine-Title-root {
+  margin: 0;
+  font-size: 1.2rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.base-edit-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.base-edit-header-actions button:not(.base-edit-close) {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.base-edit-header-actions button:first-child {
+  background: var(--color-primary);
+  color: white;
+}
+
+.base-edit-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.base-edit-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.base-edit-section h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+}
+
+.base-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.base-edit-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+.base-edit-form input {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.base-edit-form input:disabled {
+  background: var(--color-bg-input);
+  color: var(--color-text-secondary);
+}
+
+.base-edit-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.base-edit-actions button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.base-edit-actions button:first-child {
+  background: var(--color-primary);
+  color: white;
+}
+
+.base-edit-delete {
+  background: var(--color-danger-modal) !important;
+  color: white !important;
+}
+
+.base-edit-variant-block {
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background: var(--color-bg, var(--color-bg));
+}
+
+.base-edit-variant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.base-edit-variant-header > div {
+  display: flex;
+  gap: 8px;
+}
+
+.base-edit-variant-header button {
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--color-primary);
+  color: white;
+}
+
+.base-edit-variant-delete {
+  background: var(--color-danger-modal) !important;
+}
+
+.base-edit-variant-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.base-edit-component-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.base-edit-component-row input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.base-edit-add-comp {
+  align-self: flex-start;
+  padding: 6px 12px;
+  background: transparent;
+  color: var(--color-primary);
+  border: 1px dashed var(--color-primary);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.base-edit-variant-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.base-edit-chip {
+  font-size: 0.8rem;
+  background: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+}
+
+.base-edit-new-variant {
+  border-color: var(--color-primary);
+  border-style: dashed;
+}
+
+.base-edit-new-variant h4 {
+  margin: 0 0 10px;
+}
+
+.base-edit-new-variant-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.base-edit-add-variant {
+  padding: 10px 16px;
+  background: transparent;
+  color: var(--color-primary);
+  border: 2px dashed var(--color-primary);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.base-edit-message {
+  margin: 12px 20px;
+  padding: 8px;
+  color: var(--color-primary);
+  font-size: 0.9rem;
+}
+
+.base-edit-hint {
+  margin: 8px 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  word-break: break-all;
+}
+
+.base-edit-variants-hint {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+}
+
+.base-edit-variant-summary {
+  margin-bottom: 12px;
+}
+
+.base-edit-variant-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+
+@media (min-width: 640px) {
+  .base-edit-variant-modal-overlay {
+    align-items: center;
+    padding: 24px;
+  }
+}
+
+.base-edit-variant-modal {
+  background: var(--color-bg-white, #fff);
+  width: 100%;
+  max-width: min(92vw, 720px);
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -4px 24px var(--color-shadow-xl);
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .base-edit-variant-modal {
+    border-radius: 12px;
+    max-height: 88vh;
+  }
+}
+
+.base-edit-variant-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.base-edit-variant-modal-header h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.base-edit-variant-modal-body {
+  padding: 16px 18px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.base-edit-variant-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.base-edit-required {
+  color: var(--mantine-color-red-6, #c92a2a);
+}
+
+.base-edit-variant-modal-field input[type='text'],
+.base-edit-variant-modal-field input:not([type='file']) {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.base-edit-variant-modal-var-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.base-edit-variant-modal-var-row > input:not([type='file']),
+.base-edit-variant-modal-var-row .base-edit-autocomplete-full {
+  flex: 1;
+  min-width: 120px;
+}
+
+.base-edit-variant-switches {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 88px;
+  padding-top: 2px;
+}
+
+.base-edit-variant-modal-comp-columns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg, #f5f5f5);
+}
+
+.base-edit-variant-modal-comp-columns > input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+/* Solo el botón «+ Variable»; no los ActionIcon de quitar (evita aspecto de input) */
+.base-edit-variant-modal-comp-columns button.base-edit-add-comp {
+  min-height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg-white);
+  cursor: pointer;
+}
+
+.base-edit-variant-modal-comp-columns button.base-edit-add-comp:hover:not(:disabled) {
+  background: var(--color-danger-modal);
+  color: #fff;
+  border-color: var(--color-danger-modal);
+}
+
+.base-edit-remove-var {
+  flex-shrink: 0;
+  margin-top: 22px;
+}
+
+.base-edit-autocomplete-full {
+  width: 100%;
+}
+
+.base-edit-variant-modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.base-edit-variant-modal-footer > button:first-child {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.base-edit-variant-modal-save {
+  flex: 1;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.base-edit-variant-modal-save:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.base-edit-variant-modal-save:disabled,
+.base-edit-variant-modal-footer > button:first-child:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
